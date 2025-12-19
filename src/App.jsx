@@ -13,7 +13,28 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  // ใช้ useCallback เพื่อให้เรียกใช้ซ้ำได้ทั้งตอนเริ่มแอปและหลัง Login
+  const handleLike = async (bookId) => {
+  try {
+    const response = await fetch(`http://localhost:3001/books/${bookId}/like`, {
+      method: 'PATCH', 
+    });
+
+    if (response.ok) {
+      fetchBooks(); 
+    }
+  } catch (error) {
+    console.error("Error liking book:", error);
+  }
+};
+
+// ฟังก์ชันสำหรับปุ่ม Edit
+const handleEdit = (book) => {
+  // ตัวอย่าง: ถ้าใช้ Modal ให้เปิด Modal และส่งข้อมูล book เข้าไป
+  // หรือถ้าใช้การ Redirect ให้ใช้ useNavigate ของ react-router-dom
+  console.log("แก้ไขหนังสือ:", book);
+  // window.location.href = `/edit/${book.id}`; // ตัวอย่างการเปลี่ยนหน้า
+};
+
   const setAuthHeader = (token) => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;

@@ -11,13 +11,12 @@ export default function BookList(props) {
     {
       title: "Cover",
       dataIndex: 'coverUrl',
-      render: (text) => <Image src={`http://localhost:3080/${text}`} height={100} />,
+      render: (text) => <Image src={`http://localhost:3080/${text}`} height={100} fallback="https://via.placeholder.com/100?text=No+Image" />,
     },
     {
       title: 'Category',
       dataIndex: 'category',
       key: 'category',
-      // แก้ไขตรงนี้: ใช้ value?.name เพื่อกัน Error กรณีค่าว่าง
       render: (value) => (
         <Tag color="blue">{value?.name || 'ไม่มีหมวดหมู่'}</Tag>
       ),
@@ -28,14 +27,22 @@ export default function BookList(props) {
       key: 'action',
       render: (text, record) => (
         <Space>
-          <Button type="primary" onClick={() => props.onLiked(record)}>Like</Button>
-          <Button onClick={() => props.onEdit(record)}>Edit</Button>
+          {/* ส่ง record.id กลับไปให้ handleLikeBook */}
+          <Button type="primary" onClick={() => props.onLiked(record.id)}>
+            Like
+          </Button>
+          
+          {/* ส่งทั้ง record กลับไปให้ handleEditBook เพื่อนำข้อมูลไปโชว์ใน Form */}
+          <Button onClick={() => props.onEdit(record)}>
+            Edit
+          </Button>
+
           <Popconfirm title="Are you sure?" onConfirm={() => props.onDeleted(record.id)}>
             <Button danger type="dashed">Delete</Button>
           </Popconfirm>
         </Space>
-  ),
-}
+      ),
+    },
   ];
 
   return (
