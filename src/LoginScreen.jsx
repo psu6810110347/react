@@ -2,33 +2,29 @@ import { useState } from 'react';
 import { Button, Form, Input, Alert } from 'antd';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom'; 
 
 const URL_AUTH = "/api/auth/login";
 
 export default function LoginScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [errMsg, setErrMsg] = useState(null);
+  const navigate = useNavigate(); 
 
   const handleLogin = async (formData) => {
     try {
       setIsLoading(true);
       setErrMsg(null);
-      
-      // 1. ส่งข้อมูลไป Login
       const response = await axios.post(URL_AUTH, formData);
       const token = response.data.access_token;
 
-      // 2. เก็บ Token ลงใน Cookie (สำคัญมาก: เพื่อให้ Refresh แล้วไม่หลุด)
-      Cookies.set('token', token, { expires: 1 });
-
-      // 3. ตั้งค่า Header ให้ Axios
+      Cookies.set('token', token, { expires: 1 }); 
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      // 4. แจ้ง App.jsx ว่า Login สำเร็จเพื่อเปลี่ยนหน้า
-      props.onLoginSuccess();
+      props.onLoginSuccess(); 
+      navigate('/books'); 
 
     } catch (err) {
-      console.log(err);
       setErrMsg(err.message);
     } finally {
       setIsLoading(false);
