@@ -1,6 +1,22 @@
 import { useState } from 'react';
 import { Button, Form, Input, Alert } from 'antd';
 import axios from 'axios'
+import Cookies from 'js-cookie';
+
+ const handleLogin = async (formData) => {
+  try {
+    setIsLoading(true);
+    const response = await axios.post(URL_AUTH, formData);
+    const token = response.data.access_token;
+
+    Cookies.set('token', token, { expires: 1 }); // เก็บไว้ใน Cookie 1 วัน
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    
+    props.onLoginSuccess(token);
+  } catch(err) {
+    setErrMsg(err.message);
+  } finally { setIsLoading(false); }
+}
 
 const URL_AUTH = "/api/auth/login"
 
