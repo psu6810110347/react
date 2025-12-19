@@ -1,28 +1,37 @@
 import { useState } from 'react';
-import { Button, Form, Input, Alert } from 'antd';
-import axios from 'axios';
+import { Button, Form, Input, Alert, Checkbox } from 'antd';
 import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom'; 
-
-const URL_AUTH = "/api/auth/login";
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function LoginScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [errMsg, setErrMsg] = useState(null);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
-  const handleLogin = async (formData) => {
+  const handleLogin = async (values) => {
     try {
       setIsLoading(true);
       setErrMsg(null);
-      const response = await axios.post(URL_AUTH, formData);
+      
+      const response = await axios.post("/auth/login", {
+        username: values.username,
+        password: values.password
+      });
+      
       const token = response.data.access_token;
 
-      Cookies.set('token', token, { expires: 1 }); 
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      Cookies.remove('token');
 
-      props.onLoginSuccess(); 
-      navigate('/books'); 
+      if (values.remember) {
+        Cookies.set('token', token, { expires: 7 }); 
+      } else {
+        Cookies.set('token', token); 
+      }
+
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      props.onLoginSuccess(token);
+      navigate('/books');
 
     } catch (err) {
       setErrMsg(err.message);
@@ -32,28 +41,20 @@ export default function LoginScreen(props) {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: 'auto', marginTop: '100px' }}>
-      <Form onFinish={handleLogin} autoComplete="off" layout="vertical">
-        {errMsg && (
-          <Form.Item>
-            <Alert message={errMsg} type="error" showIcon />
-          </Form.Item>
-        )}
-
-        <Form.Item
-          label="Username"
-          name="username"
-          rules={[{ required: true, message: 'Please input your username!' }]}
-        >
+    <div style={{ maxWidth: 400, margin: '100px auto' }}>
+      <Form onFinish={handleLogin} layout="vertical">
+        {errMsg && <Alert message={errMsg} type="error" style={{ marginBottom: 20 }} />}
+        
+        <Form.Item name="username" label="Username" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
 
-        <Form.Item
-          label="Password"
-          name="password"
-          rules={[{ required: true, message: 'Please input your password!' }]}
-        >
+        <Form.Item name="password" label="Password" rules={[{ required: true }]}>
           <Input.Password />
+        </Form.Item>
+
+        <Form.Item name="remember" valuePropName="checked">
+          <Checkbox>Remember Me</Checkbox>
         </Form.Item>
 
         <Form.Item>
